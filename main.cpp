@@ -184,6 +184,7 @@ void receive_ip_and_relay(char *dev, char *sender_ip, char *target_ip, std::stri
 
 			IpHdr *ip = (IpHdr*)(packet + sizeof(EthHdr));
 			std::string p_source_ip = std::string(ip->sip());
+			std::string p_destination_ip = std::string(ip->dip());
 
 			if(p_source_ip.compare(sender_ip) == 0){
 				//Second, check whether the IP is from sender.
@@ -202,7 +203,7 @@ void receive_ip_and_relay(char *dev, char *sender_ip, char *target_ip, std::stri
 			    }
 
 			}//End of 2nd "if"
-			else if(p_source_ip.compare(target_ip) == 0){
+			else if(p_destination_ip.compare(sender_ip) == 0){
 				//Third, check whether the IP is from target.
 				printf("\nSuccessfully received target's IP!\n");
 
